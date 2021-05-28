@@ -330,7 +330,7 @@ library(igraph)
 
 bigram_graph <- super_bigrams %>%
   count(word1, word2, sort = TRUE) %>%
-#  filter(n > 1) %>%
+  filter(n > 1) %>%
   top_n(30) %>%
   graph_from_data_frame()
 
