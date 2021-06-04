@@ -127,7 +127,7 @@ library(igraph)
 bigram_graph <- super_bigrams %>%
   count(word1, word2, sort = TRUE) %>%
   filter(n > 1) %>%
-  top_n(30) %>%
+  top_n(20) %>%
   graph_from_data_frame()
 
 
@@ -331,7 +331,7 @@ library(igraph)
 bigram_graph <- super_bigrams %>%
   count(word1, word2, sort = TRUE) %>%
   filter(n > 1) %>%
-  top_n(30) %>%
+  top_n(20) %>%
   graph_from_data_frame()
 
 
@@ -493,7 +493,7 @@ library(igraph)
 bigram_graph <- super_bigrams %>%
   count(word1, word2, sort = TRUE) %>%
   filter(n > 1) %>%
-  top_n(30) %>%
+  top_n(20) %>%
   graph_from_data_frame()
 
 
@@ -652,7 +652,7 @@ library(igraph)
 bigram_graph <- super_bigrams %>%
   count(word1, word2, sort = TRUE) %>%
   filter(n > 1) %>%
-  top_n(30) %>%
+  top_n(20) %>%
   graph_from_data_frame()
 
 
@@ -800,7 +800,7 @@ library(igraph)
 bigram_graph <- super_bigrams %>%
   count(word1, word2, sort = TRUE) %>%
   filter(n > 1) %>%
-  top_n(30) %>%
+  top_n(20) %>%
   graph_from_data_frame()
 
 
@@ -948,7 +948,7 @@ library(igraph)
 bigram_graph <- super_bigrams %>%
   count(word1, word2, sort = TRUE) %>%
   filter(n > 1) %>%
-  top_n(30) %>%
+  top_n(20) %>%
   graph_from_data_frame()
 
 
@@ -1106,7 +1106,7 @@ library(igraph)
 bigram_graph <- super_bigrams %>%
   count(word1, word2, sort = TRUE) %>%
   filter(n > 1) %>%
-  top_n(30) %>%
+  top_n(20) %>%
   graph_from_data_frame()
 
 
@@ -1271,7 +1271,7 @@ library(igraph)
 bigram_graph <- super_bigrams %>%
   count(word1, word2, sort = TRUE) %>%
 #  filter(n > 1) %>%
-  top_n(30) %>%
+  top_n(20) %>%
   graph_from_data_frame()
 
 
