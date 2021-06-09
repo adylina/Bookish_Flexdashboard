@@ -1,5 +1,7 @@
 # Bookish_Flexdashboard
-An easy way to visualise trends in reading patterns. Ideally, you shouldn't need to actually know anything about coding to run this. The markdown file pulls the data to populate your flexdashboard from a google sheet.
+An easy way to visualise trends in reading patterns. Ideally, you shouldn't need to actually know anything about coding to run this. The markdown file pulls the data to populate your flexdashboard from a google sheet. 
+
+If you haven't already, you'll need to download RStudio to run this markdown file and display the flexdashboard. The program is completely free, so you shouldn't have to pay anything to load it onto your computer. You can find more information about downloading R and RStudio here: https://rstudio-education.github.io/hopr/starting.html
 
 
 # Why use this dashboard?
