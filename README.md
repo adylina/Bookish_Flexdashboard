@@ -10,3 +10,6 @@ I love reading and like to keep a record of the things I read, details about the
 To this end, I created this flexdashboard. There are a couple of small changes that you'll need to make to run it, but those are detailed in the instructions at the top of the markdown (RMD) file. There is also a CSV file which tells you what the column names should be in your google sheet and how to structure the data in it so your flexdashboard will run without errors. 
 
 I hope you enjoy this as much as I do! 
+
+# How are the dashboards different?
+In June 2021, I added a second version of the Bookish Flexdash with added tabs for genre and subgenre-specific trends. You *should* be able to run your flexdash without making too many modifications, but these tabs will be much, much more useful if you change the names to match what *you* read.
