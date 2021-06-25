@@ -46,7 +46,7 @@ library(wesanderson)
 
 
 # import the kraken 
-TBR <- read_sheet("https://docs.google.com/spreadsheets/d/1jpC93OrIsiifb1nuK8EzZ2pwMC-Nf1uqmJ-AADFVv8I/edit#gid=0")
+TBR <- read_sheet("google_sheets_url_goes_here")
 
 # clean up the months
 TBR <- TBR %>%
