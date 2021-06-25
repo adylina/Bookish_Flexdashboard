@@ -708,20 +708,32 @@ TBR %>%
 Column
 -----------------------------------------------------------------------
 
-### Table of 5 star reads
+### 5 star reads by genre
 
 ```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
 
+TBR$Year <- as.factor(TBR$Year)
+
 TBR %>%
   filter((Rating == "5") & (!is.na(Month)) & (Start_Finish == "1")) %>%
-  group_by(Author, Title, Series, Series_Order) %>%
+  group_by(Year, Genre) %>%
   summarise(sum(Start_Finish, na.rm = T)) %>%
-  arrange(Author, Series, Series_Order) %>%
-  select(-Series, -Series_Order) %>%
-  rename(`Times Read` = "sum(Start_Finish, na.rm = T)") %>%
-  select(Author, Title, Series, `Times Read`) %>%
-  kable(caption = "5 Star Reads") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed"))
+  rename(`Books Read` = "sum(Start_Finish, na.rm = T)") %>%
+  ggplot(aes(fill = Year, x = Genre, y = `Books Read`)) +
+  geom_bar(stat="identity") + 
+  scale_colour_discrete(name = "Year") +
+  expand_limits(y = 0) +
+    labs(title = "Count of Books Read Each Year by Genre",
+         #       caption = "Source: Amanda's Reading Log",
+         y = "Number of Books Read",
+         x = "Genre") +
+  theme_classic() +
+  theme(strip.background = element_rect(fill = "#FFFFFF"),
+        text = element_text(size = 11), 
+        axis.text.x = element_text(angle = 45, size = 10, vjust = 1.0, hjust = 1.0),
+#        legend.title = element_text("Year"),
+        legend.position = "bottom") +
+  scale_fill_manual(values = wes_palette("IsleofDogs1"))
 
 ```
 
@@ -856,20 +868,32 @@ TBR %>%
 Column
 -----------------------------------------------------------------------
 
-### Table of 3 and 4 star reads
+### 3 and 4 star reads by genre
 
 ```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
 
+TBR$Year <- as.factor(TBR$Year)
+
 TBR %>%
   filter((Rating >= "3") & (Rating < "5") & (!is.na(Month)) & (Start_Finish == "1")) %>%
-  group_by(Author, Title, Series, Series_Order) %>%
+  group_by(Year, Genre) %>%
   summarise(sum(Start_Finish, na.rm = T)) %>%
-  arrange(Author, Series, Series_Order) %>%
-  select(-Series, -Series_Order) %>%
-  rename(`Times Read` = "sum(Start_Finish, na.rm = T)") %>%
-  select(Author, Title, Series, `Times Read`) %>%
-  kable(caption = "3 and 4 Star Reads") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed"))
+  rename(`Books Read` = "sum(Start_Finish, na.rm = T)") %>%
+  ggplot(aes(fill = Year, x = Genre, y = `Books Read`)) +
+  geom_bar(stat="identity") + 
+  scale_colour_discrete(name = "Year") +
+  expand_limits(y = 0) +
+    labs(title = "Count of Books Read Each Year by Genre",
+         #       caption = "Source: Amanda's Reading Log",
+         y = "Number of Books Read",
+         x = "Genre") +
+  theme_classic() +
+  theme(strip.background = element_rect(fill = "#FFFFFF"),
+        text = element_text(size = 11), 
+        axis.text.x = element_text(angle = 45, size = 10, vjust = 1.0, hjust = 1.0),
+#        legend.title = element_text("Year"),
+        legend.position = "bottom") +
+  scale_fill_manual(values = wes_palette("IsleofDogs1"))
 
 ```
 
@@ -1000,20 +1024,32 @@ TBR %>%
 Column
 -----------------------------------------------------------------------
 
-### Table of regrettable reads
+### Regrettable reads by genre
 
 ```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
 
+TBR$Year <- as.factor(TBR$Year)
+
 TBR %>%
   filter((Rating < "3") & (!is.na(Month)) & (Start_Finish == "1")) %>%
-  group_by(Author, Title, Series, Series_Order) %>%
+  group_by(Year, Genre) %>%
   summarise(sum(Start_Finish, na.rm = T)) %>%
-  arrange(Author, Series, Series_Order) %>%
-  select(-Series, -Series_Order) %>%
-  rename(`Times Read` = "sum(Start_Finish, na.rm = T)") %>%
-  select(Author, Title, Series, `Times Read`) %>%
-  kable(caption = "Regrettable Reads") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed"))
+  rename(`Books Read` = "sum(Start_Finish, na.rm = T)") %>%
+  ggplot(aes(fill = Year, x = Genre, y = `Books Read`)) +
+  geom_bar(stat="identity") + 
+  scale_colour_discrete(name = "Year") +
+  expand_limits(y = 0) +
+    labs(title = "Count of Books Read Each Year by Genre",
+         #       caption = "Source: Amanda's Reading Log",
+         y = "Number of Books Read",
+         x = "Genre") +
+  theme_classic() +
+  theme(strip.background = element_rect(fill = "#FFFFFF"),
+        text = element_text(size = 11), 
+        axis.text.x = element_text(angle = 45, size = 10, vjust = 1.0, hjust = 1.0),
+#        legend.title = element_text("Year"),
+        legend.position = "bottom") +
+  scale_fill_manual(values = wes_palette("IsleofDogs1"))
 
 ```
 
@@ -1323,17 +1359,32 @@ TBR %>%
 Column
 -----------------------------------------------------------------------
 
-### Table of DNF reads
+### DNF reads by genre
 
 ```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
 
+TBR$Year <- as.factor(TBR$Year)
+
 TBR %>%
   filter((Start_DNF == "1"), (!is.na(Month))) %>%
-  select(c(Year, Month, Author, Title, Series)) %>%
-  arrange(Year, Month, Author, Series) %>%
-#  group_by(Author, Title) %>%
-  kable(caption = "DNF Reads") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed"))
+  group_by(Year, Genre) %>%
+  summarise(sum(Start_DNF, na.rm = T)) %>%
+  rename(`Books Read` = "sum(Start_DNF, na.rm = T)") %>%
+  ggplot(aes(fill = Year, x = Genre, y = `Books Read`)) +
+  geom_bar(stat="identity") + 
+  scale_colour_discrete(name = "Year") +
+  expand_limits(y = 0) +
+    labs(title = "Count of Books Read Each Year by Genre",
+         #       caption = "Source: Amanda's Reading Log",
+         y = "Number of Books Read",
+         x = "Genre") +
+  theme_classic() +
+  theme(strip.background = element_rect(fill = "#FFFFFF"),
+        text = element_text(size = 11), 
+        axis.text.x = element_text(angle = 45, size = 10, vjust = 1.0, hjust = 1.0),
+#        legend.title = element_text("Year"),
+        legend.position = "bottom") +
+  scale_fill_manual(values = wes_palette("IsleofDogs1"))
 
 ```
 
