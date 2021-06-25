@@ -13,3 +13,23 @@ I hope you enjoy this as much as I do!
 
 # How are the dashboards different?
 In June 2021, I added a second version of the Bookish Flexdash with added tabs for genre and subgenre-specific trends. You *should* be able to run your flexdash without making too many modifications, but these tabs will be much, much more useful if you change the names to match what *you* read.
+
+# Using the genre tabs
+To utilise this version of the flexdashboard, you will need to change the names of the tabs **and** the calls for R to subset the data by genre. The key for this will generally to be to watch for (and then change!) calls for *(Genre == "Genre_Name_Here")*. 
+
+It's very important that you're consistently recording these terms the same way in your reading log.  R is only as clever as what you tell it to do and it won't recognise misspellings or when you fail to capitalise something ("romance" vs "Romance"). If you're careful in your data management, though, this shouldn't cause you many issues. 
+
+**Example 1:**
+*History {data-navmenu="Genres"}*
+
+For this tab, you would want to change the tab title "History" to something else that would be more suitable for your own reading habits. 
+
+**Example 2:**
+*bigrams <- subset(TBR, (Genre == "History") & (Start_Finish == "1"))*
+
+The same action will need to be taken here to change (Genre == "History") to whatever you would like the tab to reflect
+
+**Example 3:**
+*filter((!is.na(Month)) & (Start_Finish == "1") & (Genre == "History")) %>%*
+
+Again, you just need to swap out the "History" term for whatever will be more relevant for you
