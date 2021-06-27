@@ -1871,6 +1871,161 @@ TBR %>%
 
 ```
 
+Fantasy {data-navmenu="Genres"}
+=====================================
+  
+  Column
+-----------------------------------------------------------------------
+  
+  ### Bigram network from review text
+  
+  ```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+
+bigrams <- subset(TBR, (Genre == "Fantasy") & (Start_Finish == "1"))
+
+bigrams$Notes <- tolower(bigrams$Notes)
+
+bigrams <- bigrams %>%
+  filter(!is.na(Notes)) %>%
+  unnest_tokens(bigram, Notes, token = "ngrams", n = 2)
+
+
+# move the bigram column to the front
+bigrams <- bigrams %>%
+  select(bigram)
+
+
+# break them up
+super_bigrams <- bigrams %>%
+  separate(bigram, c("word1", "word2"), sep = " ")
+
+# filter off stopwords
+super_bigrams <- super_bigrams %>%
+  filter(!word1 %in% stop_words$word) %>%
+  filter(!word2 %in% stop_words$word)
+
+
+#####
+# visualise the relationships between bigrams
+#####
+
+library(igraph)
+
+bigram_graph <- super_bigrams %>%
+  count(word1, word2, sort = TRUE) %>%
+  #  filter(n > 1) %>%
+  top_n(30) %>%
+  graph_from_data_frame()
+
+
+# print
+library(ggraph)
+set.seed(2017)
+
+ggraph(bigram_graph, layout = "fr") +
+  geom_edge_link() +
+  geom_node_point(color = '#20A387FF', size = 1.5) +
+  ggtitle("Bigram Network of Book Review Text") +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  theme_void()
+
+```
+
+### Number of books read each month
+
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+
+TBR$Year <- as.factor(TBR$Year)
+TBR$Month <- as.factor(TBR$Month)
+
+TBR %>%
+  filter((!is.na(Month)) & (Start_Finish == "1") & (Genre == "Fantasy")) %>%
+  group_by(Year, Month) %>%
+  summarise(sum(Start_Finish)) %>%
+  rename(`Books Read` = "sum(Start_Finish)") %>%
+  ggplot(aes(x = Month, y = `Books Read`, group = Year)) +
+  geom_line(aes (col = Year)) + 
+  geom_point(aes (col = Year)) +
+  scale_colour_discrete(name = "Year") +
+  expand_limits(y = 0) +
+  labs(title = "Count of Books Read Each Month",
+       #       caption = "Source: Amanda's Reading Log",
+       y = "Number of Books Read",
+       x = "Month") +
+  theme_classic() +
+  theme(strip.background = element_rect(fill = "#FFFFFF"),
+        text = element_text(size = 14), 
+        axis.text.x = element_text(angle = 45, size = 12, vjust = 1.0, hjust = 1.0),
+        legend.title = element_blank(),
+        plot.title = element_text(size = 15),
+        legend.position = "bottom") +
+  scale_colour_manual(values = wes_palette("IsleofDogs1"))
+
+
+```
+
+Column
+-----------------------------------------------------------------------
+  
+  ### Number of reads by subgenre
+  
+  ```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+
+TBR %>%
+  filter((Start_Finish == "1") & (Genre == "Fantasy")) %>%
+  group_by(Year, Subgenre) %>%
+  summarise(sum(Start_Finish, na.rm = T)) %>%
+  rename(`Books Read` = "sum(Start_Finish, na.rm = T)") %>%
+  ggplot(aes(fill = Year, x = Subgenre, y = `Books Read`)) +
+  geom_bar(stat="identity") + 
+  scale_colour_discrete(name = "Year") +
+  expand_limits(y = 0) +
+  labs(title = "Count of Books Read Each Year by Subgenre",
+       #       caption = "Source: Amanda's Reading Log",
+       y = "Number of Books Read",
+       x = "Genre") +
+  theme_classic() +
+  theme(strip.background = element_rect(fill = "#FFFFFF"),
+        text = element_text(size = 11), 
+        axis.text.x = element_text(angle = 45, size = 10, vjust = 1.0, hjust = 1.0),
+        #        legend.title = element_text("Year"),
+        legend.position = "bottom") +
+  scale_fill_manual(values = wes_palette("IsleofDogs1"))
+
+```
+
+### Number of pages each month
+
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+
+TBR$Year <- as.factor(TBR$Year)
+TBR$Month <- as.factor(TBR$Month)
+
+TBR %>%
+  filter((!is.na(Month)) & (Start_Finish == "1") & (Genre == "Fantasy")) %>%
+  group_by(Year, Month) %>%
+  summarise(sum(Pages, na.rm = T)) %>%
+  rename(`Pages Read` = "sum(Pages, na.rm = T)") %>%
+  ggplot(aes(x = Month, y = `Pages Read`, group = Year)) +
+  geom_line(aes (col = Year)) + 
+  geom_point(aes (col = Year)) +
+  scale_colour_discrete(name = "Year") +
+  expand_limits(y = 0) +
+  labs(title = "Pages Read Each Month",
+       #       caption = "Source: Amanda's Reading Log",
+       y = "Number of Pages Read",
+       x = "Month") +
+  theme_classic() +
+  theme(strip.background = element_rect(fill = "#FFFFFF"),
+        text = element_text(size = 14), 
+        axis.text.x = element_text(angle = 45, size = 12, vjust = 1.0, hjust = 1.0),
+        legend.title = element_blank(),
+        plot.title = element_text(size = 15),
+        legend.position = "bottom") +
+  scale_colour_manual(values = wes_palette("IsleofDogs1"))
+
+```
+
 History {data-navmenu="Genres"}
 =====================================
 
