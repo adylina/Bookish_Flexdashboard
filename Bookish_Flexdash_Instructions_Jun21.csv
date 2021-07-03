@@ -14,6 +14,6 @@ Genre,Character,"The book’s genre. I usually keep this quite broad (e.g., hist
 Subgenre,Character,The book's subgenre.,,
 Pages,Numeric,Number of pages in the book. I use the number in Apple Books to account for differences in typeface and book height/width,,
 Order,Numeric,The order in which I read the book. Resets each year.,,
-Rating,Numeric,Graded on a 5-point Likert scale,,
+Rating,Numeric,Graded on a 5-point scale,,
 Single_Day,0/1,"Indicates whether I completed the book within 24 hours of beginning it. This makes me feel better so I don’t have to think about the fact that I sat still for 14 hours to read a book, possibly without moving.",,
 Notes,Character,Review of the book. The flexdash creates bigram networks of the terms you include. ,,
