@@ -33,3 +33,9 @@ The same action will need to be taken here to change (Genre == "History") to wha
 *filter((!is.na(Month)) & (Start_Finish == "1") & (Genre == "History")) %>%*
 
 Again, you just need to swap out the "History" term for whatever will be more relevant for you
+
+
+![image](https://user-images.githubusercontent.com/60521652/129488423-e4a2190a-8f05-444a-901b-83b62f65c1a8.png)
+
+![image](https://user-images.githubusercontent.com/60521652/129488438-7c607115-f62a-41b1-8bd6-aecdd59cd999.png)
+
