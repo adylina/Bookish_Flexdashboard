@@ -35,7 +35,12 @@ The same action will need to be taken here to change (Genre == "History") to wha
 Again, you just need to swap out the "History" term for whatever will be more relevant for you
 
 
+**All Reads Tab**
 ![image](https://user-images.githubusercontent.com/60521652/129488423-e4a2190a-8f05-444a-901b-83b62f65c1a8.png)
 
+**TBR Tab**
+![image](https://user-images.githubusercontent.com/60521652/129488461-40f5d846-1438-48ea-a35e-d2fdeb9533eb.png)
+
+**Overall Genre Trends Tab**
 ![image](https://user-images.githubusercontent.com/60521652/129488438-7c607115-f62a-41b1-8bd6-aecdd59cd999.png)
 
