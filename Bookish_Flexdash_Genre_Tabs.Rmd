@@ -67,23 +67,6 @@ TBR$Month <- ordered(TBR$Month,
                      levels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
                               "Oct", "Nov", "Dec"))
 
-
-# wee summary table of key metrics for each month and year
-reading_summary <- TBR %>%
-  group_by(Year, Month) %>%
-  filter(!is.na(Month)) %>%
-  summarise(sum(Start_Finish, na.rm = T), sum(Pages, na.rm = T), mean(Rating, na.rm = T), sum(Single_Day, na.rm = T)) %>%
-  rename(Books_Read = "sum(Start_Finish, na.rm = T)", Pages = "sum(Pages, na.rm = T)", 
-         Mean_Rating = "mean(Rating, na.rm = T)", Single_Day = "sum(Single_Day, na.rm = T)")
-
-reading_summary$Mean_Rating <- round(reading_summary$Mean_Rating, digits = 2)
-
-
-# create levels for the months so they're properly ordered in visualisations
-reading_summary$Month <- ordered(reading_summary$Month, 
-                                 levels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
-                                          "Oct", "Nov", "Dec"))
-
 ```
 
 All Reads {data-navmenu="Reading Overview"}
@@ -94,7 +77,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- TBR %>%
   filter((!is.na(Notes)), (Start_Finish == "1")) %>%
@@ -139,14 +122,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -181,7 +164,7 @@ Column
 
 ### Average rating by month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -212,7 +195,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -255,35 +238,113 @@ Column
 TBR %>%
   filter(Preorder == "1") %>%
   select(c(Author, Title, Notes)) %>%
-  kable(caption = "Books on Preorder") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed"))
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed")) %>%
+  column_spec(1, width = "15em") %>%
+  column_spec(2, width = "15em")
 
 ```
 
-### Library holds
+### Library holds 
 
 ```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
 TBR %>%
   filter(Library_Hold == "1") %>%
-  select(c(Author, Title, Series)) %>%
-  kable(caption = "Books on Hold from the Library") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed"))
+  select(c(Author, Series, Title, Genre)) %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed")) %>%
+  column_spec(1, width = "15em") %>%
+  column_spec(2, width = "15em") %>%
+  column_spec(3, width = "15em")
 
 ```
 
 Column
 -----------------------------------------------------------------------
 
-### TBR list
+### TBR list: series books
 
 ```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
 
 TBR %>%
-  filter((is.na(Start_Finish)) & (is.na(Start_DNF)) & (is.na(Preorder)) & (is.na(Library_Hold)) ) %>%
-  select(c(Author, Title, Series)) %>%
+  filter((is.na(Start_Finish)) & (is.na(Start_DNF))) %>%
+  filter(Series != "None") %>%
+  group_by(Author, Series, Genre) %>%
+  count(Title) %>%
+  summarise(sum(n, na.rm = T)) %>%
+  rename(`Unread Books in Series` = "sum(n, na.rm = T)") %>%
+  select(c(Author, Series, Genre, `Unread Books in Series`)) %>%
 #  arrange(Author, Series, Series_Order) %>%
-  kable(caption = "Books I'll Eventually Get Around to Reading") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed"))
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed")) %>%
+  column_spec(1, width = "15em") %>%
+  column_spec(2, width = "15em") %>%
+  column_spec(4, width = "15em")
+
+```
+
+### TBR list: non-series books
+
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+
+TBR %>%
+  filter((is.na(Start_Finish)) & (is.na(Start_DNF)) ) %>%
+  filter(Series == "None") %>%
+  select(c(Author, Title, Genre)) %>%
+#  arrange(Author, Series, Series_Order) %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed")) %>%
+  column_spec(1, width = "15em") %>%
+  column_spec(2, width = "15em") 
+
+```
+
+Books I Read {data-navmenu="Reading Overview"}
+=====================================
+
+Column
+-----------------------------------------------------------------------
+
+### Series I Read
+
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+
+TBR %>%
+  filter(Start_Finish == "1") %>%
+  filter(Series != "None") %>%
+  group_by(Author, Series, Genre) %>%
+  distinct(Title, Rating) %>%
+  summarise(n_distinct(Title), mean(Rating)) %>%
+  rename(`Mean Rating` = "mean(Rating)", `Books Read in Series` = "n_distinct(Title)") %>%
+  mutate(`Mean Rating` = as.numeric(`Mean Rating`)) %>%
+  mutate_if(is.numeric, round, 1) %>%
+  select(c(Author, Series, Genre, `Mean Rating`, `Books Read in Series`)) %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed")) %>%
+  column_spec(1, width = "10em") %>%
+  column_spec(2, width = "15em") %>%
+  column_spec(3, width = "10em")
+
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Books Not in a Series
+
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+
+TBR %>%
+  filter(Start_Finish == "1") %>%
+  filter(Series == "None") %>%
+  group_by(Author, Genre, Rating) %>%
+  distinct(Title) %>%
+  select(c(Author, Title, Genre, Rating)) %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "condensed")) %>%
+  column_spec(1, width = "10em") %>%
+  column_spec(2, width = "30em") %>%
+  column_spec(3, width = "10em")
 
 ```
 
@@ -295,7 +356,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, Year == "2020")
 
@@ -342,14 +403,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -386,7 +447,7 @@ Column
 
 ### Average rating by month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -418,7 +479,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -456,7 +517,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, Year == "2021")
 
@@ -504,14 +565,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -546,7 +607,7 @@ Column
 
 ### Average rating by month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -578,7 +639,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -616,7 +677,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, Rating == "5")
 
@@ -663,7 +724,7 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 
@@ -673,7 +734,7 @@ ggraph(bigram_graph, layout = "fr") +
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -709,7 +770,7 @@ Column
 
 ### 5 star reads by genre
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 
@@ -738,7 +799,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -776,7 +837,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, (Rating >= "3") & (Rating < "5"))
 
@@ -824,7 +885,7 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 
@@ -834,7 +895,7 @@ ggraph(bigram_graph, layout = "fr") +
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -870,7 +931,7 @@ Column
 
 ### 3 and 4 star reads by genre
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 
@@ -899,7 +960,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -937,7 +998,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, Rating < "3")
 
@@ -984,14 +1045,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1026,7 +1087,7 @@ Column
 
 ### Regrettable reads by genre
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 
@@ -1055,7 +1116,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1093,7 +1154,7 @@ Column
 
 ### Bigram network of reviews for re-reads
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- TBR %>%
 #  filter(!is.na (Start_Finish)) %>%
@@ -1154,14 +1215,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1225,7 +1286,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1272,7 +1333,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 bigrams <- subset(TBR, Start_DNF == "1")
 
 bigrams$Notes <- tolower(bigrams$Notes)
@@ -1319,14 +1380,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of DNF books each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1361,7 +1422,7 @@ Column
 
 ### DNF reads by genre
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 
@@ -1390,7 +1451,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1428,7 +1489,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, Single_Day == "1")
 
@@ -1475,7 +1536,7 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 
@@ -1485,7 +1546,7 @@ ggraph(bigram_graph, layout = "fr") +
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1521,7 +1582,7 @@ Column
 
 ### Average rating by month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1553,7 +1614,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1591,7 +1652,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, Single_Day == "0")
 
@@ -1638,7 +1699,7 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 
@@ -1648,7 +1709,7 @@ ggraph(bigram_graph, layout = "fr") +
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1684,7 +1745,7 @@ Column
 
 ### Average rating by month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1716,7 +1777,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1754,7 +1815,7 @@ Column
 
 ### Books by genre
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR %>%
   filter(Start_Finish == "1") %>%
@@ -1781,7 +1842,7 @@ TBR %>%
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1815,7 +1876,7 @@ Column
 
 ### Books by subgenre
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR %>%
   filter(Start_Finish == "1") %>%
@@ -1842,7 +1903,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1879,7 +1940,7 @@ Fantasy {data-navmenu="Genres"}
   
   ### Bigram network from review text
   
-  ```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+  ```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, (Genre == "Fantasy") & (Start_Finish == "1"))
 
@@ -1926,14 +1987,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -1969,7 +2030,7 @@ Column
   
   ### Number of reads by subgenre
   
-  ```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+  ```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR %>%
   filter((Start_Finish == "1") & (Genre == "Fantasy")) %>%
@@ -1996,7 +2057,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -2034,7 +2095,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, (Genre == "History") & (Start_Finish == "1"))
 
@@ -2081,14 +2142,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -2124,7 +2185,7 @@ Column
 
 ### Number of reads by subgenre
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR %>%
   filter((Start_Finish == "1") & (Genre == "History")) %>%
@@ -2151,7 +2212,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -2189,7 +2250,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, (Genre == "Mystery") & (Start_Finish == "1"))
 
@@ -2236,14 +2297,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -2279,7 +2340,7 @@ Column
 
 ### Number of reads by subgenre
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR %>%
   filter((Start_Finish == "1") & (Genre == "Mystery")) %>%
@@ -2306,7 +2367,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -2344,7 +2405,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, (Genre == "Poetry") & (Start_Finish == "1"))
 
@@ -2391,14 +2452,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -2434,7 +2495,7 @@ Column
 
 ### Number of reads by subgenre
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR %>%
   filter((Start_Finish == "1") & (Genre == "Poetry")) %>%
@@ -2461,7 +2522,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -2499,7 +2560,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, (Genre == "Romance") & (Start_Finish == "1"))
 
@@ -2546,14 +2607,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -2589,7 +2650,7 @@ Column
 
 ### Number of reads by subgenre
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR %>%
   filter((Start_Finish == "1") & (Genre == "Romance")) %>%
@@ -2616,7 +2677,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -2654,7 +2715,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, (Genre == "SciFi") & (Start_Finish == "1"))
 
@@ -2701,14 +2762,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -2744,7 +2805,7 @@ Column
 
 ### Number of reads by subgenre
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR %>%
   filter((Start_Finish == "1") & (Genre == "SciFi")) %>%
@@ -2771,7 +2832,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -2809,7 +2870,7 @@ Column
 
 ### Bigram network from review text
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 bigrams <- subset(TBR, (Genre == "Young Adult") & (Start_Finish == "1"))
 
@@ -2856,14 +2917,14 @@ ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point(color = '#20A387FF', size = 1.5) +
   ggtitle("Bigram Network of Book Review Text") +
-  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5) +
+  geom_node_text(aes(label = name), repel = T, vjust = .5, hjust = .5, size = 4.5) +
   theme_void()
 
 ```
 
 ### Number of books read each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
@@ -2899,7 +2960,7 @@ Column
 
 ### Number of reads by subgenre
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR %>%
   filter((Start_Finish == "1") & (Genre == "Young Adult")) %>%
@@ -2926,7 +2987,7 @@ TBR %>%
 
 ### Number of pages each month
 
-```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
+```{r eval=TRUE, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.dim = c(11, 6)}
 
 TBR$Year <- as.factor(TBR$Year)
 TBR$Month <- as.factor(TBR$Month)
